@@ -64,9 +64,15 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
       await db.updateEmployeeStatus(widget.employeeId, selectedType!);
       await db.createLog(
           'Création d\'évenement de type $selectedType pour ${widget.employeeId}');
-
-      /*openWordFileFromAssets(
+      switch (selectedType) {
+        case 'Conge':
+        /*openWordFileFromAssets(
           'assets/testfile.docx', '${widget.employeeId}Perm.docx');*/
+        case 'Permission':
+        /*openWordFileFromAssets(
+          'assets/testfile.docx', '${widget.employeeId}Perm.docx');*/
+      }
+
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:workforce_iq/screens/employee_screen.dart';
@@ -42,14 +41,4 @@ class EmployeeApp extends StatelessWidget {
       },
     );
   }
-}
-
-Future<void> resetDatabase() async {
-  final dbPath = await getDatabasesPath();
-  final path = join(dbPath, 'employee_manager.db');
-
-  // Delete the database file
-  await databaseFactory.deleteDatabase(path);
-
-  print('Database has been reset.');
 }

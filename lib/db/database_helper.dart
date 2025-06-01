@@ -99,22 +99,85 @@ class DatabaseHelper {
 
   Future<List<Employee>> getAvailableEmployeesList() async {
     final db = await database;
-    final result = await db.query(
-      'employees',
-      where: 'status = ?',
-      whereArgs: ['Available'],
-    );
-    return result.map((map) => Employee.fromMap(map)).toList();
+    final today = DateTime.now();
+    final todayStr = today.toIso8601String();
+
+    final allEmployees = await db.query('employees');
+    List<Employee> available = [];
+
+    for (var emp in allEmployees) {
+      final empId = emp['id'];
+      final status = emp['status']?.toString() ?? '';
+
+      // 1. Check for active event overlapping with today
+      final activeEventsToday = await db.query(
+        'events',
+        where:
+            'employee_id = ? AND is_active = 1 AND DATE(start_date) <= DATE(?) AND DATE(end_date) >= DATE(?)',
+        whereArgs: [empId, todayStr, todayStr],
+      );
+
+      if (activeEventsToday.isNotEmpty) {
+        continue; // Employee is currently unavailable
+      }
+
+      // 2. Check for active events that have ended
+      final pastActiveEvents = await db.query(
+        'events',
+        where: 'employee_id = ? AND is_active = 1 AND DATE(end_date) < DATE(?)',
+        whereArgs: [empId, todayStr],
+      );
+
+      // If any ended event exists but status is not 'Available' → exclude
+      if (pastActiveEvents.isNotEmpty && status != 'Available') {
+        continue;
+      }
+
+      // Passed both checks, include employee
+      available.add(Employee.fromMap(emp));
+    }
+
+    return available;
   }
 
   Future<List<Employee>> getUnavailableEmployeesList() async {
     final db = await database;
-    final result = await db.query(
-      'employees',
-      where: 'status != ?',
-      whereArgs: ['Available'],
-    );
-    return result.map((map) => Employee.fromMap(map)).toList();
+    final today = DateTime.now();
+    final todayStr = today.toIso8601String();
+
+    final allEmployees = await db.query('employees');
+    List<Employee> unavailable = [];
+
+    for (var emp in allEmployees) {
+      final empId = emp['id'];
+      final status = emp['status']?.toString() ?? '';
+
+      // Active event overlapping today
+      final currentEvents = await db.query(
+        'events',
+        where:
+            'employee_id = ? AND is_active = 1 AND DATE(start_date) <= DATE(?) AND DATE(end_date) >= DATE(?)',
+        whereArgs: [empId, todayStr, todayStr],
+      );
+
+      if (currentEvents.isNotEmpty) {
+        unavailable.add(Employee.fromMap(emp));
+        continue;
+      }
+
+      // Past event ended but employee's status is still not 'Available'
+      final pastEvents = await db.query(
+        'events',
+        where: 'employee_id = ? AND is_active = 1 AND DATE(end_date) < DATE(?)',
+        whereArgs: [empId, todayStr],
+      );
+
+      if (pastEvents.isNotEmpty && status != 'Available') {
+        unavailable.add(Employee.fromMap(emp));
+      }
+    }
+
+    return unavailable;
   }
 
   Future<int> updateEmployee(Employee employee) async {
@@ -324,6 +387,64 @@ class DatabaseHelper {
     );
   }
 
+  Future<List<Event>> filterEvents({
+    String? eventType,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isActive,
+  }) async {
+    final db = await database;
+
+    // Build dynamic WHERE clause
+    List<String> conditions = [];
+    List<dynamic> args = [];
+
+    if (eventType != null) {
+      conditions.add('event_type = ?');
+      args.add(eventType);
+    }
+
+    if (startDate != null) {
+      conditions.add('DATE(start_date) = DATE(?)');
+      args.add(startDate.toIso8601String());
+    }
+
+    if (endDate != null) {
+      conditions.add('DATE(end_date) = DATE(?)');
+      args.add(endDate.toIso8601String());
+    }
+
+    if (isActive != null) {
+      conditions.add('is_active = ?');
+      args.add(isActive ? 1 : 0);
+    }
+
+    final whereClause = conditions.isNotEmpty ? conditions.join(' AND ') : null;
+
+    final result = await db.query(
+      'events',
+      where: whereClause,
+      whereArgs: args,
+    );
+
+    return result.map((e) => Event.fromMap(e)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getActiveEventsWithEmployeeNames() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+    SELECT events.id AS event_id, employee_id, event_type, start_date, end_date, is_active,
+           employees.name AS employee_name
+    FROM events
+    JOIN employees ON events.employee_id = employees.id
+    WHERE is_active = 1
+    ORDER BY start_date DESC
+  ''');
+
+    return result;
+  }
+
   /** ######################################################################
  * #######################################################################
  * #######################################################################
@@ -360,7 +481,7 @@ class DatabaseHelper {
 /** ######################################################################
  * #######################################################################
  * #######################################################################
- * ################### Crud methods for Logs ##########################
+ * ################### Notifications ##########################
 */
   Future<List<NotificationMessage>> getNotifications() async {
     final db = await database;
@@ -410,23 +531,22 @@ class DatabaseHelper {
     // ✅ 3. Wave starts in 2 days
     final now = DateTime.now();
     final currentYear = now.year;
-    final nextYear = now.year + 1;
 
     final waveStartDates = {
-      1: DateTime(currentYear, 6, 3),
+      1: DateTime(currentYear, 6, 4),
       2: DateTime(currentYear, 7, 20),
       3: DateTime(currentYear, 9, 10),
       4: DateTime(currentYear, 10, 30),
-      5: DateTime(nextYear, 12, 20),
-      6: DateTime(nextYear, 2, 15),
-      7: DateTime(nextYear, 4, 4),
+      5: DateTime(currentYear, 12, 20),
+      6: DateTime(currentYear, 2, 15),
+      7: DateTime(currentYear, 4, 4),
     };
 
     for (final entry in waveStartDates.entries) {
       final waveNumber = entry.key;
       final startDate = entry.value;
       final diff = startDate.difference(today).inDays;
-      print(diff);
+
       if (diff == 2) {
         final waveEmployees = await db.query(
           'employees',

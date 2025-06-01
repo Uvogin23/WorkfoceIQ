@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:workforce_iq/db/database_helper.dart';
 import 'package:workforce_iq/widgets/app_bar.dart';
 import 'package:intl/intl.dart';
 
@@ -15,11 +15,19 @@ class _EventInfoPageState extends State<EventInfoPage> {
   final TextStyle valueStyle = const TextStyle(fontSize: 16);
   final dateFormat = DateFormat('yyyy-MM-dd');
   final _formKey = GlobalKey<FormState>();
-
+  late Future<List<Map<String, dynamic>>> _futureActiveEvents =
+      Future.value([]);
   String? selectedType;
   DateTime? startDate;
   DateTime? endDate;
   bool isActive = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureActiveEvents =
+        DatabaseHelper.instance.getActiveEventsWithEmployeeNames();
+  }
 
   Widget buildInfoTile(
       String title, String value, Color bgColor, IconData? icon,
@@ -108,6 +116,95 @@ class _EventInfoPageState extends State<EventInfoPage> {
               ),
               const SizedBox(height: 20),
               Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      color: Colors.blue.shade700,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                      child: const Text(
+                        'Evènements actives',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _futureActiveEvents,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Text('Erreur: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text('Aucun événement actif trouvé.');
+                          }
+
+                          final events = snapshot.data!;
+                          final screenWidth = MediaQuery.of(context).size.width;
+
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints:
+                                  BoxConstraints(minWidth: screenWidth),
+                              child: DataTable(
+                                columnSpacing: 30,
+                                headingRowColor: WidgetStateProperty.all(
+                                    Colors.blue.shade100),
+                                dataRowColor: WidgetStateProperty.all(
+                                    Colors.grey.shade50),
+                                headingTextStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                                columns: const [
+                                  DataColumn(label: Text('ID')),
+                                  DataColumn(label: Text('Employé')),
+                                  DataColumn(label: Text('Type')),
+                                  DataColumn(label: Text('Début')),
+                                  DataColumn(label: Text('Fin')),
+                                ],
+                                rows: events.map((event) {
+                                  return DataRow(cells: [
+                                    DataCell(
+                                        Text(event['event_id'].toString())),
+                                    DataCell(
+                                        Text(event['employee_name'] ?? '')),
+                                    DataCell(Text(event['event_type'] ?? '')),
+                                    DataCell(Text(
+                                        (event['start_date'] as String)
+                                            .split('T')
+                                            .first)),
+                                    DataCell(Text((event['end_date'] as String)
+                                        .split('T')
+                                        .first)),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 child: Padding(
@@ -143,13 +240,19 @@ class _EventInfoPageState extends State<EventInfoPage> {
                                 decoration: const InputDecoration(
                                   labelText: 'Type d\'événement',
                                 ),
-                                items:
-                                    ['Mission', 'Formation', 'Congé', 'Autre']
-                                        .map((type) => DropdownMenuItem(
-                                              value: type,
-                                              child: Text(type),
-                                            ))
-                                        .toList(),
+                                items: [
+                                  'Mission',
+                                  'Formation',
+                                  'Congé',
+                                  'Permission',
+                                  'Absent',
+                                  'Maladie'
+                                ]
+                                    .map((type) => DropdownMenuItem(
+                                          value: type,
+                                          child: Text(type),
+                                        ))
+                                    .toList(),
                                 onChanged: (value) {
                                   selectedType = value;
                                 },
@@ -231,12 +334,6 @@ class _EventInfoPageState extends State<EventInfoPage> {
                   ),
                 ),
               ),
-
-              /// Personnel Details
-
-              const SizedBox(height: 30),
-
-              /// Leave History Table
             ],
           ),
         ),

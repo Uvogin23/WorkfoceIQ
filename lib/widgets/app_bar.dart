@@ -27,7 +27,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Future<void> loadNotifications() async {
     final db = DatabaseHelper.instance; // Or DatabaseHelper()
     final result = await db.getNotifications();
-    print('Loaded notifications: $result');
+
     setState(() {
       notifications = result;
     });
