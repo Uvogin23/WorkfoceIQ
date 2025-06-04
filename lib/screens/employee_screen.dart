@@ -409,8 +409,10 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
 
               /// Leave History Table
               Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(5),
+                        topRight: Radius.circular(5))),
                 child: Padding(
                   padding: const EdgeInsets.all(0),
                   child: Column(
@@ -420,6 +422,10 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                           height: 40,
                           decoration: const BoxDecoration(
                             color: Color.fromARGB(255, 57, 153, 227),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              topRight: Radius.circular(5),
+                            ),
                           ),
                           child: const Padding(
                             padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -455,52 +461,64 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                           }
 
                           final events = snapshot.data!;
+                          final screenWidth = MediaQuery.of(context).size.width;
 
                           return SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              columnSpacing: 120,
-                              columns: const [
-                                DataColumn(label: Text("Type")),
-                                DataColumn(label: Text("Début")),
-                                DataColumn(label: Text("fin")),
-                                DataColumn(label: Text("Durée")),
-                                DataColumn(label: Text("Statut")),
-                                DataColumn(label: Text("Approvée par")),
-                                DataColumn(label: Text("Actions")),
-                              ],
-                              rows: events.map((event) {
-                                final duration = event.endDate
-                                    .difference(event.startDate)
-                                    .inDays;
+                            child: ConstrainedBox(
+                              constraints:
+                                  BoxConstraints(minWidth: screenWidth),
+                              child: DataTable(
+                                columnSpacing: 20,
+                                headingRowColor: WidgetStateProperty.all(
+                                    Colors.blue.shade100),
+                                dataRowColor: WidgetStateProperty.all(
+                                    Colors.grey.shade50),
+                                headingTextStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                                columns: const [
+                                  DataColumn(label: Text("Type")),
+                                  DataColumn(label: Text("Début")),
+                                  DataColumn(label: Text("Fin")),
+                                  DataColumn(label: Text("Durée")),
+                                  DataColumn(label: Text("Statut")),
+                                  DataColumn(label: Text("Approvée par")),
+                                  DataColumn(label: Text("Actions")),
+                                ],
+                                rows: events.map((event) {
+                                  final duration = event.endDate
+                                      .difference(event.startDate)
+                                      .inDays;
 
-                                return DataRow(cells: [
-                                  DataCell(buildBadge(
-                                    event.eventType,
-                                    Colors.amber.shade100,
-                                    Colors.orange,
-                                  )),
-                                  DataCell(
-                                      Text(dateFormat.format(event.startDate))),
-                                  DataCell(
-                                      Text(dateFormat.format(event.endDate))),
-                                  DataCell(Text('$duration jours')),
-                                  DataCell(buildBadge(
-                                    event.isActive == true
-                                        ? 'En cours'
-                                        : 'Terminé',
-                                    event.isActive == true
-                                        ? Colors.blue.shade50
-                                        : Colors.green.shade50,
-                                    event.isActive == true
-                                        ? Colors.blue
-                                        : Colors.green,
-                                  )),
-                                  const DataCell(Text("Chef Service")),
-                                  DataCell(event.isActive == true
-                                      ? Row(
-                                          children: [
-                                            IconButton(
+                                  return DataRow(cells: [
+                                    DataCell(buildBadge(
+                                      event.eventType,
+                                      Colors.amber.shade100,
+                                      Colors.orange,
+                                    )),
+                                    DataCell(Text(
+                                        dateFormat.format(event.startDate))),
+                                    DataCell(
+                                        Text(dateFormat.format(event.endDate))),
+                                    DataCell(Text('$duration jours')),
+                                    DataCell(buildBadge(
+                                      event.isActive == true
+                                          ? 'En cours'
+                                          : 'Terminé',
+                                      event.isActive == true
+                                          ? Colors.blue.shade50
+                                          : Colors.green.shade50,
+                                      event.isActive == true
+                                          ? Colors.blue
+                                          : Colors.green,
+                                    )),
+                                    const DataCell(Text("Chef Service")),
+                                    DataCell(event.isActive == true
+                                        ? Row(
+                                            children: [
+                                              IconButton(
                                                 onPressed: () async {
                                                   final confirm =
                                                       await showDialog<bool>(
@@ -552,8 +570,9 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                                     setState(() {});
                                                   }
                                                 },
-                                                icon: const Icon(Icons.done)),
-                                            IconButton(
+                                                icon: const Icon(Icons.done),
+                                              ),
+                                              IconButton(
                                                 onPressed: () async {
                                                   final confirm =
                                                       await showDialog<bool>(
@@ -586,7 +605,6 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                                       ],
                                                     ),
                                                   );
-
                                                   if (confirm == true) {
                                                     final db =
                                                         await DatabaseHelper
@@ -594,45 +612,44 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                                     await db
                                                         .deleteEvent(event.id!);
                                                     await db.createLog(
-                                                        'Termination d\'évenement de type ${event.eventType} pour ${employee.name}');
+                                                        'Suppression d\'évenement de type ${event.eventType} pour ${employee.name}');
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
-                                                            const SnackBar(
-                                                      content: Text(
-                                                          'Événement supprimé avec succès.'),
-                                                      duration:
-                                                          Duration(seconds: 2),
-                                                      behavior: SnackBarBehavior
-                                                          .floating,
-                                                    ));
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            'Événement supprimé avec succès.'),
+                                                        duration: Duration(
+                                                            seconds: 2),
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                      ),
+                                                    );
                                                     setState(() {});
                                                   }
                                                 },
                                                 icon: const Icon(
-                                                  Icons.delete_forever,
-                                                  color: Colors.red,
-                                                )),
-                                            IconButton(
-                                                onPressed: () async {
-                                                  /*await generatePdfWithTemplate(
-                                                    name: employee.name,
-                                                    phone: employee.phoneNumber,
-                                                  );*/
+                                                    Icons.delete_forever,
+                                                    color: Colors.red),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
                                                   openWordFileFromAssets(
                                                       'assets/testfile.docx',
                                                       '${employee.name}.docx');
                                                 },
                                                 icon: const Icon(
-                                                  Icons.file_copy,
-                                                  color: Color.fromARGB(
-                                                      255, 240, 207, 43),
-                                                )),
-                                          ],
-                                        )
-                                      : const Text("")),
-                                ]);
-                              }).toList(),
+                                                    Icons.file_copy,
+                                                    color: Color.fromARGB(
+                                                        255, 240, 207, 43)),
+                                              ),
+                                            ],
+                                          )
+                                        : const Text("")),
+                                  ]);
+                                }).toList(),
+                              ),
                             ),
                           );
                         },

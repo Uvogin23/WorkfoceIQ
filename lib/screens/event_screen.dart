@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workforce_iq/db/database_helper.dart';
+import 'package:workforce_iq/models/event.dart';
 import 'package:workforce_iq/widgets/app_bar.dart';
 import 'package:intl/intl.dart';
 
@@ -17,10 +18,11 @@ class _EventInfoPageState extends State<EventInfoPage> {
   final _formKey = GlobalKey<FormState>();
   late Future<List<Map<String, dynamic>>> _futureActiveEvents =
       Future.value([]);
-  String? selectedType;
+  String? selectedType = 'Tous type';
   DateTime? startDate;
   DateTime? endDate;
   bool isActive = true;
+  List<Event> events = [];
 
   @override
   void initState() {
@@ -116,6 +118,305 @@ class _EventInfoPageState extends State<EventInfoPage> {
               ),
               const SizedBox(height: 20),
               Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.amber[700],
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          child: Text(
+                            "Filtres des événements",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          constraints: const BoxConstraints(maxWidth: 3000),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Type Dropdown
+                                Flexible(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(
+                                        height: 0,
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border:
+                                              Border.all(color: Colors.grey),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: DropdownButtonFormField<String>(
+                                          value: selectedType,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Sélectionner le type',
+                                            border: InputBorder.none,
+                                          ),
+                                          items: [
+                                            'Tous type',
+                                            'Mission',
+                                            'Formation',
+                                            'Conge',
+                                            'Permission',
+                                            'Absent',
+                                            'Maladie',
+                                          ]
+                                              .map((type) => DropdownMenuItem(
+                                                    value: type,
+                                                    child: Text(type),
+                                                  ))
+                                              .toList(),
+                                          onChanged: (value) => setState(
+                                              () => selectedType = value),
+                                          validator: (value) => value == null
+                                              ? 'Choisir un type'
+                                              : null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 40),
+
+                                // Start Date
+                                Flexible(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: 50,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border:
+                                              Border.all(color: Colors.grey),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () async {
+                                            final picked = await showDatePicker(
+                                              context: context,
+                                              initialDate: DateTime.now(),
+                                              firstDate: DateTime(2020),
+                                              lastDate: DateTime(2030),
+                                            );
+                                            if (picked != null) {
+                                              setState(
+                                                  () => startDate = picked);
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.date_range,
+                                            color: Colors.amber[500],
+                                          ),
+                                          label: Text(
+                                              startDate == null
+                                                  ? 'selectioner la date de début'
+                                                  : startDate
+                                                      .toString()
+                                                      .split(' ')[0],
+                                              style: const TextStyle(
+                                                  color: Colors.black)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 40),
+
+                                // End Date
+                                Flexible(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: 50,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border:
+                                              Border.all(color: Colors.grey),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () async {
+                                            final picked = await showDatePicker(
+                                              context: context,
+                                              initialDate: DateTime.now(),
+                                              firstDate: DateTime(2020),
+                                              lastDate: DateTime(2030),
+                                            );
+                                            if (picked != null) {
+                                              setState(() => endDate = picked);
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.date_range_outlined,
+                                            color: Colors.amber[500],
+                                          ),
+                                          label: Text(
+                                            endDate == null
+                                                ? 'selectioner la date de la fin'
+                                                : endDate
+                                                    .toString()
+                                                    .split(' ')[0],
+                                            style: const TextStyle(
+                                                color: Colors.black),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 40),
+
+                                // Active Toggle
+                                Flexible(
+                                  flex: 2,
+                                  child: Row(
+                                    children: [
+                                      const Text(
+                                        "En cours:",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Switch(
+                                        activeColor: Colors.amber[500],
+                                        inactiveThumbColor:
+                                            const Color.fromARGB(
+                                                255, 14, 106, 182),
+                                        value: isActive,
+                                        onChanged: (value) =>
+                                            setState(() => isActive = value),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+
+                                Flexible(
+                                  flex: 0,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(0),
+                                    child: ElevatedButton.icon(
+                                      icon: const Icon(Icons.check,
+                                          color: Colors.white),
+                                      label: const Text(
+                                        'Filtrer',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 217, 136, 13), // primary color
+                                      ),
+                                      onPressed: () async {
+                                        if (_formKey.currentState!.validate()) {
+                                          String? typeToFilter = selectedType !=
+                                                      null &&
+                                                  selectedType != 'Tous type'
+                                              ? selectedType
+                                              : null;
+
+                                          try {
+                                            List<Event> filteredEvents =
+                                                await DatabaseHelper.instance
+                                                    .filterEvents(
+                                              eventType: typeToFilter,
+                                              startDate: startDate,
+                                              endDate: endDate,
+                                              isActive: isActive,
+                                            );
+
+                                            print(
+                                                'Filtered Events: ${filteredEvents.length}');
+
+                                            setState(() {
+                                              events = filteredEvents;
+                                            });
+                                          } catch (e) {
+                                            print('Filter failed: $e');
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Erreur lors du filtrage.'),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              if (events.isNotEmpty)
+                buildEventsTableCard(events)
+              else
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      'Aucun événement trouvé avec les critères sélectionnés.',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ),
+                ),
+              const SizedBox(
+                height: 30,
+              ),
+              Card(
                 elevation: 4,
                 margin: const EdgeInsets.all(0),
                 child: Column(
@@ -127,7 +428,7 @@ class _EventInfoPageState extends State<EventInfoPage> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 12, horizontal: 16),
                       child: const Text(
-                        'Evènements actives',
+                        'Evènements actifs',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -201,138 +502,8 @@ class _EventInfoPageState extends State<EventInfoPage> {
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
-              ),
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 57, 153, 227),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                          child: Text(
-                            "Filtres des événements",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              // Type Dropdown
-                              DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  labelText: 'Type d\'événement',
-                                ),
-                                items: [
-                                  'Mission',
-                                  'Formation',
-                                  'Congé',
-                                  'Permission',
-                                  'Absent',
-                                  'Maladie'
-                                ]
-                                    .map((type) => DropdownMenuItem(
-                                          value: type,
-                                          child: Text(type),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) {
-                                  selectedType = value;
-                                },
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Start Date Picker
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime(2030),
-                                  );
-                                  if (picked != null) {
-                                    startDate = picked;
-                                  }
-                                },
-                                child:
-                                    const Text("Sélectionner la date de début"),
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // End Date Picker
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime(2030),
-                                  );
-                                  if (picked != null) {
-                                    endDate = picked;
-                                  }
-                                },
-                                child:
-                                    const Text("Sélectionner la date de fin"),
-                              ),
-
-                              const SizedBox(height: 10),
-
-                              // Active Toggle
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text("Actif uniquement"),
-                                  Switch(
-                                    value: isActive,
-                                    onChanged: (value) {
-                                      isActive = value;
-                                    },
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // Submit Button
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  // You can call your filter logic here
-                                  if (_formKey.currentState!.validate()) {
-                                    // Filter logic here using selectedType, startDate, endDate, isActive
-                                  }
-                                },
-                                icon: const Icon(Icons.search),
-                                label: const Text("Filtrer les événements"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),
@@ -342,6 +513,41 @@ class _EventInfoPageState extends State<EventInfoPage> {
         ));
   }
 }
+
+Widget buildEventsTableCard(List<Event> events) {
+  return Card(
+    elevation: 4,
+    margin: const EdgeInsets.all(20),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: const [
+            DataColumn(label: Text('ID')),
+            DataColumn(label: Text('Type')),
+            DataColumn(label: Text('Début')),
+            DataColumn(label: Text('Fin')),
+            DataColumn(label: Text('Statut')),
+          ],
+          rows: events.map((event) {
+            return DataRow(cells: [
+              DataCell(Text(event.id.toString())),
+              DataCell(Text(event.eventType)),
+              DataCell(Text(event.startDate.toString().split(' ')[0])),
+              DataCell(Text(event.endDate.toString().split(' ')[0])),
+              DataCell(Text(event.isActive ? 'En cours' : 'Terminé')),
+            ]);
+          }).toList(),
+        ),
+      ),
+    ),
+  );
+}
+
 
 
 
