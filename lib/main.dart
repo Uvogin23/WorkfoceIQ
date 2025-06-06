@@ -15,7 +15,7 @@ void main() async {
   // Set the database factory for desktop
   databaseFactory = databaseFactoryFfi;
   await windowManager.ensureInitialized();
-  await windowManager.setMinimumSize(const Size(1100, 600));
+  await windowManager.setMinimumSize(const Size(1200, 600));
   runApp(const EmployeeApp());
 }
 

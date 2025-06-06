@@ -395,37 +395,38 @@ class DatabaseHelper {
   }) async {
     final db = await database;
 
-    // Build dynamic WHERE clause
     List<String> conditions = [];
     List<dynamic> args = [];
 
     if (eventType != null) {
-      conditions.add('event_type = ?');
+      conditions.add('e.event_type = ?');
       args.add(eventType);
     }
 
     if (startDate != null) {
-      conditions.add('DATE(start_date) = DATE(?)');
+      conditions.add('DATE(e.start_date) = DATE(?)');
       args.add(startDate.toIso8601String());
     }
 
     if (endDate != null) {
-      conditions.add('DATE(end_date) = DATE(?)');
+      conditions.add('DATE(e.end_date) = DATE(?)');
       args.add(endDate.toIso8601String());
     }
 
     if (isActive != null) {
-      conditions.add('is_active = ?');
+      conditions.add('e.is_active = ?');
       args.add(isActive ? 1 : 0);
     }
 
-    final whereClause = conditions.isNotEmpty ? conditions.join(' AND ') : null;
+    final whereClause =
+        conditions.isNotEmpty ? 'WHERE ' + conditions.join(' AND ') : '';
 
-    final result = await db.query(
-      'events',
-      where: whereClause,
-      whereArgs: args,
-    );
+    final result = await db.rawQuery('''
+    SELECT e.*, emp.name AS employee_name
+    FROM events e
+    LEFT JOIN employees emp ON e.employee_id = emp.id
+    $whereClause
+  ''', args);
 
     return result.map((e) => Event.fromMap(e)).toList();
   }

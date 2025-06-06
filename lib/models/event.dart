@@ -5,6 +5,7 @@ class Event {
   DateTime startDate;
   DateTime endDate;
   bool isActive;
+  final String? employeeName;
 
   Event({
     this.id,
@@ -13,6 +14,7 @@ class Event {
     required this.startDate,
     required this.endDate,
     this.isActive = true,
+    this.employeeName,
   });
 
   // Convert to Map for SQLite
@@ -36,6 +38,7 @@ class Event {
       startDate: DateTime.parse(map['start_date']),
       endDate: DateTime.parse(map['end_date']),
       isActive: map['is_active'] == 0 ? false : true,
+      employeeName: map['employee_name'], // may be null
     );
   }
 }

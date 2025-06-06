@@ -338,56 +338,87 @@ class _EventInfoPageState extends State<EventInfoPage> {
                                 Flexible(
                                   flex: 0,
                                   child: Padding(
-                                    padding: const EdgeInsets.all(0),
-                                    child: ElevatedButton.icon(
-                                      icon: const Icon(Icons.check,
-                                          color: Colors.white),
-                                      label: const Text(
-                                        'Filtrer',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color.fromARGB(
-                                            255, 217, 136, 13), // primary color
-                                      ),
-                                      onPressed: () async {
-                                        if (_formKey.currentState!.validate()) {
-                                          String? typeToFilter = selectedType !=
-                                                      null &&
-                                                  selectedType != 'Tous type'
-                                              ? selectedType
-                                              : null;
+                                      padding: const EdgeInsets.all(0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            icon: const Icon(Icons.refresh,
+                                                color: Colors.white),
+                                            label: const Text(
+                                              'Réinitialiser',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors
+                                                  .grey, // Or any other reset color
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                // Reset your form fields here
+                                                selectedType = 'Tous type';
+                                                startDate = null;
+                                                endDate = null;
 
-                                          try {
-                                            List<Event> filteredEvents =
-                                                await DatabaseHelper.instance
-                                                    .filterEvents(
-                                              eventType: typeToFilter,
-                                              startDate: startDate,
-                                              endDate: endDate,
-                                              isActive: isActive,
-                                            );
+                                                // Also clear form fields if you have any TextEditingControllers
+                                                _formKey.currentState?.reset();
+                                              });
+                                            },
+                                          ),
+                                          const SizedBox(width: 10),
+                                          ElevatedButton.icon(
+                                            icon: const Icon(Icons.check,
+                                                color: Colors.white),
+                                            label: const Text(
+                                              'Filtrer',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color.fromARGB(
+                                                      255, 217, 136, 13),
+                                            ),
+                                            onPressed: () async {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                String? typeToFilter =
+                                                    selectedType != null &&
+                                                            selectedType !=
+                                                                'Tous type'
+                                                        ? selectedType
+                                                        : null;
 
-                                            print(
-                                                'Filtered Events: ${filteredEvents.length}');
+                                                try {
+                                                  List<Event> filteredEvents =
+                                                      await DatabaseHelper
+                                                          .instance
+                                                          .filterEvents(
+                                                    eventType: typeToFilter,
+                                                    startDate: startDate,
+                                                    endDate: endDate,
+                                                    isActive: isActive,
+                                                  );
 
-                                            setState(() {
-                                              events = filteredEvents;
-                                            });
-                                          } catch (e) {
-                                            print('Filter failed: $e');
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    'Erreur lors du filtrage.'),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ),
+                                                  setState(() {
+                                                    events = filteredEvents;
+                                                  });
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'Erreur lors du filtrage.'),
+                                                    ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      )),
                                 ),
                               ],
                             ),
@@ -398,11 +429,8 @@ class _EventInfoPageState extends State<EventInfoPage> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 30,
-              ),
               if (events.isNotEmpty)
-                buildEventsTableCard(events)
+                buildEventsTableCard(context, events)
               else
                 const Center(
                   child: Padding(
@@ -514,7 +542,8 @@ class _EventInfoPageState extends State<EventInfoPage> {
   }
 }
 
-Widget buildEventsTableCard(List<Event> events) {
+Widget buildEventsTableCard(BuildContext context, List<Event> events) {
+  final screenWidth = MediaQuery.of(context).size.width;
   return Card(
     elevation: 4,
     margin: const EdgeInsets.all(20),
@@ -525,28 +554,40 @@ Widget buildEventsTableCard(List<Event> events) {
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('ID')),
-            DataColumn(label: Text('Type')),
-            DataColumn(label: Text('Début')),
-            DataColumn(label: Text('Fin')),
-            DataColumn(label: Text('Statut')),
-          ],
-          rows: events.map((event) {
-            return DataRow(cells: [
-              DataCell(Text(event.id.toString())),
-              DataCell(Text(event.eventType)),
-              DataCell(Text(event.startDate.toString().split(' ')[0])),
-              DataCell(Text(event.endDate.toString().split(' ')[0])),
-              DataCell(Text(event.isActive ? 'En cours' : 'Terminé')),
-            ]);
-          }).toList(),
-        ),
+        child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: screenWidth),
+            child: DataTable(
+              columnSpacing: 1,
+              headingRowColor: WidgetStateProperty.all(Colors.amber[400]),
+              dataRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+              headingTextStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              columns: const [
+                DataColumn(label: Text('ID')),
+                DataColumn(label: Text('Employé')),
+                DataColumn(label: Text('Type')),
+                DataColumn(label: Text('Début')),
+                DataColumn(label: Text('Fin')),
+                DataColumn(label: Text('Statut')),
+              ],
+              rows: events.map((event) {
+                return DataRow(cells: [
+                  DataCell(Text(event.id.toString())),
+                  DataCell(Text(event.employeeName ?? '')), // <- Added
+                  DataCell(Text(event.eventType)),
+                  DataCell(Text(event.startDate.toString().split(' ').first)),
+                  DataCell(Text(event.endDate.toString().split(' ').first)),
+                  DataCell(Text(event.isActive ? 'En cours' : 'Terminé')),
+                ]);
+              }).toList(),
+            )),
       ),
     ),
   );
 }
+
 
 
 
