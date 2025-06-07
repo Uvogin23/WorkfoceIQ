@@ -265,7 +265,7 @@ class StatusCard extends StatelessWidget {
   }
 }
 
-class PersonnelList extends StatelessWidget {
+class PersonnelList extends StatefulWidget {
   final String title;
   final bool isAvailable;
   final List<Employee> personnel;
@@ -278,64 +278,62 @@ class PersonnelList extends StatelessWidget {
   });
 
   @override
+  State<PersonnelList> createState() => _PersonnelListState();
+}
+
+class _PersonnelListState extends State<PersonnelList> {
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
+    final int itemCountToShow = _showAll
+        ? widget.personnel.length
+        : (widget.personnel.length > 4 ? 4 : widget.personnel.length);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
-      padding: const EdgeInsets.all(0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Top bar with title and color
+          // Title container
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isAvailable
+              color: widget.isAvailable
                   ? const Color.fromARGB(255, 30, 168, 35)
                   : Colors.red,
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(12)),
             ),
             child: Text(
-              title,
+              widget.title,
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
             ),
           ),
+
+          // Personnel List
           ListView.separated(
-            itemCount: personnel.length,
+            itemCount: itemCountToShow,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
-              final p = personnel[index];
-              var daysSinceArrival = 0;
+              final p = widget.personnel[index];
+              int daysSinceArrival = 0;
+
               return FutureBuilder<String>(
                 future: getEndDate(p.id!),
                 builder: (context, snapshot) {
-                  // ignore: unused_local_variable
-                  Color? tileBgColor;
-
-                  if (!isAvailable &&
-                      snapshot.hasData &&
-                      snapshot.data != null) {
-                    final endDate = DateTime.tryParse(snapshot.data!);
-                    if (endDate != null &&
-                        (endDate.isBefore(DateTime.now()) ||
-                            endDate.isAtSameMomentAs(DateTime.now()))) {
-                      tileBgColor = const Color.fromARGB(255, 235, 213, 216);
-                    }
-                  }
-
                   return Container(
                     color: () {
-                      if (isAvailable) {
-                        // ignore: unnecessary_null_comparison
+                      if (widget.isAvailable) {
                         if (p.arrivalDate != null) {
                           daysSinceArrival =
                               DateTime.now().difference(p.arrivalDate).inDays;
@@ -347,29 +345,26 @@ class PersonnelList extends StatelessWidget {
                           }
                         }
                       } else {
-                        // If unavailable, color based on end date logic
                         final endDate = DateTime.tryParse(snapshot.data ?? '');
                         if (endDate != null &&
-                            (endDate.isBefore(DateTime.now()))) {
+                            endDate.isBefore(DateTime.now())) {
                           return const Color.fromARGB(255, 240, 110, 110);
                         }
                       }
-                      return null; // Default background
+                      return null;
                     }(),
                     child: ListTile(
                       onTap: () {
                         Navigator.pushNamed(context, '/employee', arguments: p);
                       },
                       leading: CircleAvatar(
-                        backgroundColor: isAvailable
+                        backgroundColor: widget.isAvailable
                             ? const Color.fromARGB(255, 30, 168, 35)
                             : Colors.red,
-                        child: const Icon(
-                          Icons.person,
-                        ),
+                        child: const Icon(Icons.person),
                       ),
                       title: Text(p.name),
-                      subtitle: isAvailable
+                      subtitle: widget.isAvailable
                           ? Text(
                               '${p.rank} • ${p.office} • ${p.arrivalDate.toIso8601String().split('T').first}')
                           : snapshot.connectionState == ConnectionState.waiting
@@ -378,7 +373,7 @@ class PersonnelList extends StatelessWidget {
                                   ? const Text('Erreur')
                                   : Text(
                                       '${p.office} • ${p.status} • Retour: ${formatDate(snapshot.data ?? '')}'),
-                      trailing: isAvailable
+                      trailing: widget.isAvailable
                           ? Chip(
                               label: Text('$daysSinceArrival jours'),
                               backgroundColor:
@@ -391,6 +386,17 @@ class PersonnelList extends StatelessWidget {
               );
             },
           ),
+
+          // View more/less button
+          if (widget.personnel.length > 4)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _showAll = !_showAll;
+                });
+              },
+              child: Text(_showAll ? 'Voir moins' : 'Voir plus'),
+            ),
         ],
       ),
     );

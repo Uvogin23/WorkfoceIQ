@@ -180,7 +180,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                         ],
                       ),
                     ),
-                    const PopupMenuItem<String>(
+                    /*const PopupMenuItem<String>(
                       value: 'logs',
                       child: Row(
                         children: [
@@ -196,7 +196,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                           ),
                         ],
                       ),
-                    ),
+                    ),*/
                     const PopupMenuItem<String>(
                       value: 'logout',
                       child: Row(
