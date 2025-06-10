@@ -621,7 +621,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                               value: selectedDepartment,
                                               decoration: const InputDecoration(
                                                 hintText:
-                                                    'Selectioner le bureau',
+                                                    'Sélectionner la Brigade/Bureau',
                                                 hintStyle: TextStyle(
                                                     color: Colors.grey,
                                                     fontSize: 14),

@@ -3,6 +3,7 @@ import 'package:workforce_iq/db/database_helper.dart';
 import 'package:workforce_iq/models/employee.dart';
 import 'package:workforce_iq/models/event.dart';
 import 'package:workforce_iq/models/log.dart';
+// ignore: unused_import
 import 'package:workforce_iq/services/open_file.dart';
 import 'package:workforce_iq/widgets/add_event.dart';
 import 'package:workforce_iq/widgets/app_bar.dart';
@@ -633,7 +634,7 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                                     Icons.delete_forever,
                                                     color: Colors.red),
                                               ),
-                                              IconButton(
+                                              /*IconButton(
                                                 onPressed: () {
                                                   openWordFileFromAssets(
                                                       'assets/testfile.docx',
@@ -643,7 +644,7 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                                     Icons.file_copy,
                                                     color: Color.fromARGB(
                                                         255, 240, 207, 43)),
-                                              ),
+                                              ),*/
                                             ],
                                           )
                                         : const Text("")),

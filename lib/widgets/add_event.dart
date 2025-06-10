@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workforce_iq/db/database_helper.dart';
 import 'package:workforce_iq/models/event.dart';
+// ignore: unused_import
 import 'package:workforce_iq/services/open_file.dart';
 
 class CreateEventDialog extends StatefulWidget {
@@ -61,16 +62,34 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
 
       final db = await DatabaseHelper.instance;
       await db.createEvent(newEvent);
-      await db.updateEmployeeStatus(widget.employeeId, selectedType!);
+
+      final today = DateTime.now();
+      final todayOnly = DateTime(today.year, today.month, today.day);
+      final eventStart =
+          DateTime(startDate!.year, startDate!.month, startDate!.day);
+
+      if (!eventStart.isAfter(todayOnly)) {
+        // Start date is today or earlier – apply status immediately
+        await db.updateEmployeeStatus(widget.employeeId, selectedType!);
+      } else {
+        // Start date is in the future – schedule activation
+        await db.createScheduledStatusUpdate(
+          widget.employeeId,
+          selectedType!,
+          startDate!,
+        );
+      }
+
       await db.createLog(
-          'Création d\'évenement de type $selectedType pour ${widget.employeeId}');
+        'Création d\'évenement de type $selectedType pour ${widget.employeeId}',
+      );
+
       switch (selectedType) {
         case 'Conge':
-        /*openWordFileFromAssets(
-          'assets/testfile.docx', '${widget.employeeId}Perm.docx');*/
         case 'Permission':
-        /*openWordFileFromAssets(
-          'assets/testfile.docx', '${widget.employeeId}Perm.docx');*/
+          // Optional: generate Word doc
+          // openWordFileFromAssets('assets/testfile.docx', '${widget.employeeId}Perm.docx');
+          break;
       }
 
       if (context.mounted) {

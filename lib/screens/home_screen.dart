@@ -334,6 +334,7 @@ class _PersonnelListState extends State<PersonnelList> {
                   return Container(
                     color: () {
                       if (widget.isAvailable) {
+                        // ignore: unnecessary_null_comparison
                         if (p.arrivalDate != null) {
                           daysSinceArrival =
                               DateTime.now().difference(p.arrivalDate).inDays;

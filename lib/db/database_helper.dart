@@ -19,7 +19,7 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'employee_manager.db');
-
+    print('Database is stored at: $path');
     return await openDatabase(
       path,
       version: 1,
@@ -64,6 +64,15 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         action TEXT,
         timestamp TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE scheduled_updates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        employee_id INTEGER NOT NULL,
+        new_status TEXT NOT NULL,
+        activate_on DATE NOT NULL
       )
     ''');
   }
@@ -565,5 +574,37 @@ class DatabaseHelper {
     }
 
     return notifications;
+  }
+
+  Future<void> createScheduledStatusUpdate(
+      int employeeId, String newStatus, DateTime activateOn) async {
+    final db = await database;
+    await db.insert('scheduled_updates', {
+      'employee_id': employeeId,
+      'new_status': newStatus,
+      'activate_on': activateOn.toIso8601String().split('T').first,
+    });
+  }
+
+  Future<void> applyScheduledStatusUpdates() async {
+    final db = await database;
+    final today = DateTime.now().toIso8601String().split('T').first;
+
+    final updates = await db.query(
+      'scheduled_updates',
+      where: 'activate_on <= ?',
+      whereArgs: [today],
+    );
+
+    for (final update in updates) {
+      final employeeId = update['employee_id'] as int;
+      final newStatus = update['new_status'] as String;
+
+      await updateEmployeeStatus(employeeId, newStatus);
+      await db.delete('scheduled_updates',
+          where: 'id = ?', whereArgs: [update['id']]);
+      await createLog(
+          'Mise à jour automatique du statut de l\'employé $employeeId à "$newStatus"');
+    }
   }
 }
