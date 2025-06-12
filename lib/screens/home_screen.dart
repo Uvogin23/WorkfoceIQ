@@ -69,7 +69,7 @@ class _WorkforceDashboardState extends State<WorkforceDashboard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'SWMT Djanet Dashboard',
+                        ' Dashboard de service',
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),

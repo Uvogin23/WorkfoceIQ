@@ -75,6 +75,31 @@ class DatabaseHelper {
         activate_on DATE NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE departments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE brigades (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        department_id INTEGER,
+        name TEXT NOT NULL,
+        FOREIGN KEY (department_id) REFERENCES departments(id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1), -- Only one row allowed
+        wilaya TEXT NOT NULL,
+        department_id INTEGER NOT NULL,
+        FOREIGN KEY (department_id) REFERENCES departments(id)
+      )
+    ''');
   }
 
   // CRUD methods for Employee:
@@ -241,11 +266,10 @@ class DatabaseHelper {
     );
   }
 
-/** ######################################################################
- * #######################################################################
- * #######################################################################
- * ################### Crud methods for Event ##########################
-*/
+  /// ######################################################################
+  /// #######################################################################
+  /// #######################################################################
+  /// ################### Crud methods for Event ##########################
 
   Future<int> createEvent(Event event) async {
     final db = await database;
@@ -455,11 +479,10 @@ class DatabaseHelper {
     return result;
   }
 
-  /** ######################################################################
- * #######################################################################
- * #######################################################################
- * ################### Crud methods for Logs ##########################
-*/
+  /// ######################################################################
+  /// #######################################################################
+  /// #######################################################################
+  /// ################### Crud methods for Logs ##########################
 
   Future<void> createLog(String action) async {
     final db = await database;
@@ -488,11 +511,10 @@ class DatabaseHelper {
     await db.delete('logs');
   }
 
-/** ######################################################################
- * #######################################################################
- * #######################################################################
- * ################### Notifications ##########################
-*/
+  /// ######################################################################
+  /// #######################################################################
+  /// #######################################################################
+  /// ################### Notifications ##########################
   Future<List<NotificationMessage>> getNotifications() async {
     final db = await database;
     final today = DateTime.now();
@@ -606,5 +628,30 @@ class DatabaseHelper {
       await createLog(
           'Mise à jour automatique du statut de l\'employé $employeeId à "$newStatus"');
     }
+  }
+
+  Future<bool> hasSettings() async {
+    final db = await database;
+    final result = await db.query('settings');
+    return result.isNotEmpty;
+  }
+
+  Future<void> saveSettings(String wilaya, int departmentId) async {
+    final db = await database;
+    await db.insert(
+      'settings',
+      {
+        'id': 1,
+        'wilaya': wilaya,
+        'department_id': departmentId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getSettings() async {
+    final db = await database;
+    final result = await db.query('settings', where: 'id = ?', whereArgs: [1]);
+    return result.isNotEmpty ? result.first : null;
   }
 }

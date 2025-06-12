@@ -13,7 +13,9 @@ import 'package:workforce_iq/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const EmployeeApp());
+    await tester.pumpWidget(const EmployeeApp(
+      isFirstLaunch: false,
+    ));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

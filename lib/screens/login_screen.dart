@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 30),
                       Text(
-                        'WorkforceIQ: SWMT Djanet',
+                        'WORKFORCE-IQ',
                         style: TextStyle(
                           fontSize: size.width < 600 ? 20 : 24,
                           fontWeight: FontWeight.w900,

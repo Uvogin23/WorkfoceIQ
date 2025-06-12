@@ -6,6 +6,7 @@ import 'package:workforce_iq/db/database_helper.dart';
 import 'package:workforce_iq/screens/employee_screen.dart';
 import 'package:workforce_iq/screens/add_employee.dart';
 import 'package:workforce_iq/screens/event_screen.dart';
+import 'package:workforce_iq/screens/setup_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -19,11 +20,17 @@ void main() async {
   await windowManager.setMinimumSize(const Size(1200, 600));
   final db = DatabaseHelper.instance;
   await db.applyScheduledStatusUpdates();
-  runApp(const EmployeeApp());
+  final hasSettings = await db.hasSettings();
+  print(hasSettings);
+  runApp(EmployeeApp(
+    isFirstLaunch: !hasSettings,
+  ));
 }
 
 class EmployeeApp extends StatelessWidget {
-  const EmployeeApp({super.key});
+  final bool isFirstLaunch;
+
+  const EmployeeApp({super.key, required this.isFirstLaunch});
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +40,14 @@ class EmployeeApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
-      initialRoute: '/',
+      initialRoute: isFirstLaunch ? '/setup' : '/',
       routes: {
         '/': (context) => const LoginScreen(),
-        //'/': (context) => const AddEmployeePage(),
         '/home': (context) => const WorkforceDashboard(),
         '/employee': (context) => const EmployeeInfoPage(),
         '/addemployee': (context) => const AddEmployeePage(),
         '/eventHistory': (context) => const EventInfoPage(),
+        '/setup': (context) => const SetupScreen(),
       },
     );
   }
