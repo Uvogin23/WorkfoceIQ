@@ -45,213 +45,271 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 20, 61, 122),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 236, 236, 236),
-              Color.fromARGB(255, 221, 221, 221),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      backgroundColor: const Color(0xfff5f6fa),
+      body: Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)],
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: LayoutBuilder(builder: (context, constraints) {
-              final double containerWidth = constraints.maxWidth * 0.9 < 400
-                  ? constraints.maxWidth * 0.9
-                  : constraints.maxWidth * 0.28;
-
-              return Center(
+          child: Row(
+            children: [
+              // Left side: Blue panel
+              Expanded(
+                flex: 2,
                 child: Container(
-                  width: containerWidth,
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromARGB(255, 70, 70, 72)
-                            .withOpacity(0.3),
-                        spreadRadius: 4,
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+                    color: const Color.fromARGB(255, 21, 70, 174),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: size.height * 0.35,
-                        child: const ClipRRect(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                          child: Image(
-                            image: AssetImage('assets/SWMT.png'),
-                            fit: BoxFit.cover,
-                            width: double.infinity,
+                      Center(
+                        child: Text(
+                          'WORKFORCE-IQ',
+                          style: TextStyle(
+                            fontSize: 36,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 16),
+                      Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          indent: 200,
+                          endIndent: 200),
+                      SizedBox(height: 32),
                       Text(
-                        'WORKFORCE-IQ',
+                        'Bienvenue sur votre plateforme de gestion',
                         style: TextStyle(
-                          fontSize: size.width < 600 ? 20 : 24,
-                          fontWeight: FontWeight.w900,
-                          fontStyle: FontStyle.normal,
-                          color: Colors.indigo.shade700,
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 30),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8),
-                              child: Text(
-                                'wilaya',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: DropdownButtonFormField<String>(
-                                value: selectedWilaya,
-                                items: ['Alger', 'Sétif', 'Oran']
-                                    .map((w) => DropdownMenuItem(
-                                        value: w, child: Text(w)))
-                                    .toList(),
-                                onChanged: (value) =>
-                                    setState(() => selectedWilaya = value),
-                                decoration:
-                                    const InputDecoration(labelText: 'Wilaya'),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8),
-                              child: Text(
-                                'Mot de passe',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: DropdownButton<int>(
-                                value: selectedDepartmentId,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedDepartmentId = value!;
-                                  });
-                                },
-                                items: departments
-                                    .map<DropdownMenuItem<int>>((dept) {
-                                  return DropdownMenuItem<int>(
-                                    value: dept['id'],
-                                    child: Text(dept['name']),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                          255, 13, 78, 131),
-                                      minimumSize: const Size.fromHeight(45),
-                                    ),
-                                    onPressed: _saveSettings,
-                                    child: const Text(
-                                      'Accéder au Login',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                          255, 234, 239, 243),
-                                      minimumSize: const Size.fromHeight(45),
-                                    ),
-                                    onPressed: () {},
-                                    child: const Text(
-                                      'Quitter',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Color.fromARGB(255, 158, 49, 49),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                      SizedBox(height: 16),
+                      Text(
+                        "WORKFORCE-IQ est une solution complète pour optimiser "
+                        "la gestion de votre personnel et améliorer l'efficacité opérationnelle.",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        "Comment accéder à l'application:\n\n"
+                        "1. Sélectionnez votre wilaya dans le menu déroulant\n"
+                        "2. Choisissez le service concerné\n"
+                        "3. Cliquez sur \"ACCÉDER AU LOGIN\" pour continuer",
+                        style: TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                      Spacer(),
+                      Center(
+                        child: Text(
+                          '© 2025 WORKFORCE-IQ. OPP/ Cheloufi Youcef Ouassim.',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            }),
+              ),
+
+              const SizedBox(width: 24),
+
+              // Right side: Form
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Configuration Initiale',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff1f2937),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      /// Wilaya
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text('WILAYA',
+                            style: TextStyle(color: Colors.black)),
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: selectedWilaya,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Sélectionnez une wilaya',
+                          ),
+                          items: [
+                            'Adrar',
+                            'Chlef',
+                            'Laghouat',
+                            'Oum El Bouaghi',
+                            'Batna',
+                            'Bejaia',
+                            'Biskra',
+                            'Bechar',
+                            'Blida',
+                            'Bouira',
+                            'Tamanrasset',
+                            'Tebessa',
+                            'Tlemcen',
+                            'Tiaret',
+                            'Tizi Ouzou',
+                            'Alger',
+                            'Djelfa',
+                            'Jijel',
+                            'Setif',
+                            'Saida',
+                            'Skikda',
+                            'Sidi Bel Abbes',
+                            'Annaba',
+                            'Guelma',
+                            'Constantine',
+                            'Medea',
+                            'Mostaganem',
+                            'Msila',
+                            'Mascara',
+                            'Ouargla',
+                            'Oran',
+                            'El Bayadh',
+                            'Illizi',
+                            'Bordj Bou Arreridj',
+                            'Boumerdes',
+                            'El Tarf',
+                            'Tindouf',
+                            'Tissemsilt',
+                            'El Oued',
+                            'Khenchela',
+                            'Souk Ahras',
+                            'Tipaza',
+                            'Mila',
+                            'Ain Defla',
+                            'Naama',
+                            'Ain Temouchent',
+                            'Ghardaia',
+                            'Relizane',
+                            'Timimoun',
+                            'Bordj Badji Mokhtar',
+                            'Ouled Djellal',
+                            'Beni Abbes',
+                            'In Salah',
+                            'In Guezzam',
+                            'Touggourt',
+                            'Djanet',
+                            'El Mghair',
+                            'El Menia'
+                          ]
+                              .map((w) =>
+                                  DropdownMenuItem(value: w, child: Text(w)))
+                              .toList(),
+                          onChanged: (value) =>
+                              setState(() => selectedWilaya = value),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// Department
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: Text('SERVICE',
+                            style: TextStyle(color: Colors.black)),
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButtonFormField<int>(
+                          value: selectedDepartmentId,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Sélectionnez un service',
+                          ),
+                          onChanged: (value) =>
+                              setState(() => selectedDepartmentId = value),
+                          items: departments
+                              .map((dept) => DropdownMenuItem<int>(
+                                    value: dept['id'],
+                                    child: Text(dept['name']),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      /// Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _saveSettings,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 13, 78, 131),
+                                minimumSize: const Size.fromHeight(45),
+                              ),
+                              child: const Text(
+                                'ACCÉDER AU LOGIN',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color.fromARGB(255, 234, 239, 243),
+                                minimumSize: const Size.fromHeight(45),
+                              ),
+                              child: const Text(
+                                'QUITTER',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 158, 49, 49),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
           ),
-        ),
-      ),
-      bottomNavigationBar: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'SWMT DJANET 2025',
-              style: TextStyle(
-                fontSize: 8,
-                color: Color.fromARGB(255, 214, 233, 245),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              'Developed by OPP/Cheloufi Youcef Ouassim',
-              style: TextStyle(
-                fontSize: 8,
-                color: Color.fromARGB(255, 214, 233, 245),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -21,7 +21,6 @@ void main() async {
   final db = DatabaseHelper.instance;
   await db.applyScheduledStatusUpdates();
   final hasSettings = await db.hasSettings();
-  print(hasSettings);
   runApp(EmployeeApp(
     isFirstLaunch: !hasSettings,
   ));

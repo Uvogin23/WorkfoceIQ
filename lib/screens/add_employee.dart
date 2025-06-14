@@ -24,6 +24,31 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   String? selectedState;
   DateTime? selectedDate;
   DateTime? birthday;
+  List<Map<String, dynamic>> brigades = [];
+
+  Future<void> _loadBrigadesForCurrentDepartment() async {
+    final settings = await DatabaseHelper.instance.getSettings();
+    if (settings == null) return;
+
+    final deptId = settings['department_id'] as int;
+    final db = await DatabaseHelper.instance.database;
+
+    brigades = await db.query(
+      'brigades',
+      where: 'department_id = ?',
+      whereArgs: [deptId],
+    );
+    print(brigades.first['name']);
+
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadBrigadesForCurrentDepartment();
+  }
 
   void _saveEmployee() async {
     if (_formKey.currentState!.validate()) {
@@ -627,21 +652,14 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                                     fontSize: 14),
                                                 border: InputBorder.none,
                                               ),
-                                              items: [
-                                                'Chef Service',
-                                                'Adjoint au Chef de Service',
-                                                'Secretariat',
-                                                'Bureau Informatique',
-                                                'Bureau de video surveillance',
-                                                'Bureau des télécommunications',
-                                                'Bureau d\'exploitation',
-                                                'Bureau des supports techniques'
-                                              ]
-                                                  .map((dept) =>
-                                                      DropdownMenuItem(
-                                                          value: dept,
-                                                          child: Text(dept)))
-                                                  .toList(),
+                                              items: brigades.map((brigade) {
+                                                final name =
+                                                    brigade['name'] as String;
+                                                return DropdownMenuItem<String>(
+                                                  value: name,
+                                                  child: Text(name),
+                                                );
+                                              }).toList(),
                                               onChanged: (value) => setState(
                                                   () => selectedDepartment =
                                                       value),

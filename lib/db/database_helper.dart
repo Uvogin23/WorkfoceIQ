@@ -19,7 +19,7 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'employee_manager.db');
-    print('Database is stored at: $path');
+    //print('Database is stored at: $path');
     return await openDatabase(
       path,
       version: 1,
@@ -100,6 +100,38 @@ class DatabaseHelper {
         FOREIGN KEY (department_id) REFERENCES departments(id)
       )
     ''');
+
+    await db.insert('departments', {'name': 'SWPJ'});
+    await db.insert('departments', {'name': 'SWSP'});
+    await db.insert('departments', {'name': 'SWRG'});
+    await db.insert('departments', {'name': 'SWPG'});
+    await db.insert('departments', {'name': 'BMPJ'});
+    await db.insert('departments', {'name': 'BRI'});
+    await db.insert('departments', {'name': 'SWAG'});
+    await db.insert('departments', {'name': 'SWMT'});
+    await db.insert('departments', {'name': 'SU'});
+    await db.insert('departments', {'name': 'BPFA'});
+    await db.insert('departments', {'name': 'BPFT'});
+    await db.insert('departments', {'name': 'SRMT'});
+    await db.insert('departments', {'name': 'CIR'});
+    await db.insert('departments', {'name': 'URS'});
+    await db.insert('departments', {'name': 'SWSASS'});
+    await db.insert('departments', {'name': 'CCRP'});
+    await db.insert(
+        'brigades', {'department_id': 8, 'name': 'BUREAU INFORMATIQUE'});
+    await db.insert(
+        'brigades', {'department_id': 8, 'name': 'BUREAU TELECOMUNICATIONS'});
+    await db.insert(
+        'brigades', {'department_id': 8, 'name': 'BUREAU D\'EXPLOITATION'});
+    await db.insert('brigades',
+        {'department_id': 8, 'name': 'BUREAU DES SUPPORTS TECHNIQUE'});
+    await db.insert('brigades',
+        {'department_id': 8, 'name': 'BUREAU DE VIDEO-SURVEILLANCE'});
+    await db.insert('brigades', {'department_id': 8, 'name': 'SECRETARIAT'});
+    await db
+        .insert('brigades', {'department_id': 8, 'name': 'CHEF DE SERVICE'});
+    await db.insert(
+        'brigades', {'department_id': 8, 'name': 'ADJOINT AU CHEF DE SERVICE'});
   }
 
   // CRUD methods for Employee:
