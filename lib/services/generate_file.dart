@@ -1,4 +1,4 @@
-import 'package:syncfusion_flutter_pdf/pdf.dart';
+/*import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:flutter/services.dart' show Rect, rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -31,4 +31,4 @@ Future<void> generatePdfWithTemplate({
   document.dispose();
 
   print('✅ PDF généré: ${file.path}');
-}
+}*/
