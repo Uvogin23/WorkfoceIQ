@@ -127,8 +127,8 @@ class _EventInfoPageState extends State<EventInfoPage> {
                     children: [
                       Container(
                         height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.amber[700],
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 11, 150, 196),
                         ),
                         child: const Padding(
                           padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -558,7 +558,9 @@ Widget buildEventsTableCard(BuildContext context, List<Event> events) {
             constraints: BoxConstraints(minWidth: screenWidth),
             child: DataTable(
               columnSpacing: 1,
-              headingRowColor: WidgetStateProperty.all(Colors.amber[400]),
+              headingRowColor: WidgetStateProperty.all(
+                const Color.fromARGB(255, 11, 150, 196),
+              ),
               dataRowColor: WidgetStateProperty.all(Colors.grey.shade50),
               headingTextStyle: const TextStyle(
                 fontWeight: FontWeight.bold,

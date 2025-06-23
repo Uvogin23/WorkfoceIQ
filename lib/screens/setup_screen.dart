@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:workforce_iq/db/database_helper.dart';
 import 'package:workforce_iq/screens/login_screen.dart';
 
@@ -287,7 +288,9 @@ class _SetupScreenState extends State<SetupScreen> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () {
+                                windowManager.close();
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     const Color.fromARGB(255, 234, 239, 243),

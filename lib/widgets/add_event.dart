@@ -86,9 +86,12 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
 
       switch (selectedType) {
         case 'Conge':
+          openWordFileFromAssets(
+              'assets/Conge.docx', '${widget.employeeId} Perm.docx');
         case 'Permission':
           // Optional: generate Word doc
-          // openWordFileFromAssets('assets/testfile.docx', '${widget.employeeId}Perm.docx');
+          openWordFileFromAssets(
+              'assets/Permission.doc', '${widget.employeeId} Perm.doc');
           break;
       }
 

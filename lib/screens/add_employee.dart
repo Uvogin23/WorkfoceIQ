@@ -38,7 +38,6 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       where: 'department_id = ?',
       whereArgs: [deptId],
     );
-    print(brigades.first['name']);
 
     setState(() {});
   }

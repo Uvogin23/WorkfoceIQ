@@ -101,14 +101,15 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.insert('departments', {'name': 'SWPJ'});
+    await db.insert('departments', {'name': 'SWMT'});
+    /*await db.insert('departments', {'name': 'SWPJ'});
     await db.insert('departments', {'name': 'SWSP'});
     await db.insert('departments', {'name': 'SWRG'});
     await db.insert('departments', {'name': 'SWPG'});
     await db.insert('departments', {'name': 'BMPJ'});
     await db.insert('departments', {'name': 'BRI'});
     await db.insert('departments', {'name': 'SWAG'});
-    await db.insert('departments', {'name': 'SWMT'});
+    
     await db.insert('departments', {'name': 'SU'});
     await db.insert('departments', {'name': 'BPFA'});
     await db.insert('departments', {'name': 'BPFT'});
@@ -116,22 +117,22 @@ class DatabaseHelper {
     await db.insert('departments', {'name': 'CIR'});
     await db.insert('departments', {'name': 'URS'});
     await db.insert('departments', {'name': 'SWSASS'});
-    await db.insert('departments', {'name': 'CCRP'});
+    await db.insert('departments', {'name': 'CCRP'});*/
     await db.insert(
-        'brigades', {'department_id': 8, 'name': 'BUREAU INFORMATIQUE'});
+        'brigades', {'department_id': 1, 'name': 'BUREAU INFORMATIQUE'});
     await db.insert(
-        'brigades', {'department_id': 8, 'name': 'BUREAU TELECOMUNICATIONS'});
+        'brigades', {'department_id': 1, 'name': 'BUREAU TELECOMUNICATIONS'});
     await db.insert(
-        'brigades', {'department_id': 8, 'name': 'BUREAU D\'EXPLOITATION'});
+        'brigades', {'department_id': 1, 'name': 'BUREAU D\'EXPLOITATION'});
     await db.insert('brigades',
-        {'department_id': 8, 'name': 'BUREAU DES SUPPORTS TECHNIQUE'});
+        {'department_id': 1, 'name': 'BUREAU DES SUPPORTS TECHNIQUE'});
     await db.insert('brigades',
-        {'department_id': 8, 'name': 'BUREAU DE VIDEO-SURVEILLANCE'});
-    await db.insert('brigades', {'department_id': 8, 'name': 'SECRETARIAT'});
+        {'department_id': 1, 'name': 'BUREAU DE VIDEO-SURVEILLANCE'});
+    await db.insert('brigades', {'department_id': 1, 'name': 'SECRETARIAT'});
     await db
-        .insert('brigades', {'department_id': 8, 'name': 'CHEF DE SERVICE'});
+        .insert('brigades', {'department_id': 1, 'name': 'CHEF DE SERVICE'});
     await db.insert(
-        'brigades', {'department_id': 8, 'name': 'ADJOINT AU CHEF DE SERVICE'});
+        'brigades', {'department_id': 1, 'name': 'ADJOINT AU CHEF DE SERVICE'});
   }
 
   // CRUD methods for Employee:
@@ -351,7 +352,7 @@ class DatabaseHelper {
     // Step 1: Get the employee_id from the event
     final event = await db.query(
       'events',
-      columns: ['employee_id'],
+      columns: ['employee_id', 'start_date'],
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
@@ -360,6 +361,7 @@ class DatabaseHelper {
     if (event.isEmpty) return 0;
 
     final employeeId = event.first['employee_id'];
+    final startDate = event.first['start_date'];
 
     // Step 2: Delete the event
     final deleted = await db.delete(
@@ -368,7 +370,14 @@ class DatabaseHelper {
       whereArgs: [id],
     );
 
-    // Step 3: Update employee status to 'Available'
+    // Step 3: Delete the related scheduled status update (if exists)
+    await db.delete(
+      'scheduled_updates',
+      where: 'employee_id = ? AND activate_on = ?',
+      whereArgs: [employeeId, startDate],
+    );
+
+    // Step 4: Reset employee status to 'Available'
     await db.update(
       'employees',
       {'status': 'Available'},
@@ -597,13 +606,13 @@ class DatabaseHelper {
     final currentYear = now.year;
 
     final waveStartDates = {
-      1: DateTime(currentYear, 6, 4),
-      2: DateTime(currentYear, 7, 20),
-      3: DateTime(currentYear, 9, 10),
-      4: DateTime(currentYear, 10, 30),
-      5: DateTime(currentYear, 12, 20),
+      1: DateTime(currentYear, 6, 1),
+      2: DateTime(currentYear, 7, 23),
+      3: DateTime(currentYear, 9, 13),
+      4: DateTime(currentYear, 11, 4),
+      5: DateTime(currentYear, 12, 25),
       6: DateTime(currentYear, 2, 15),
-      7: DateTime(currentYear, 4, 4),
+      7: DateTime(currentYear, 4, 7),
     };
 
     for (final entry in waveStartDates.entries) {
