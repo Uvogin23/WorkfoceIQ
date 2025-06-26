@@ -503,7 +503,7 @@ class _EmployeeInfoPageState extends State<EmployeeInfoPage> {
                                         dateFormat.format(event.startDate))),
                                     DataCell(
                                         Text(dateFormat.format(event.endDate))),
-                                    DataCell(Text('$duration jours')),
+                                    DataCell(Text('${duration + 1} jours')),
                                     DataCell(buildBadge(
                                       event.isActive == true
                                           ? 'En cours'

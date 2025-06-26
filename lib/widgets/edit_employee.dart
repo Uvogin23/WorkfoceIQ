@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workforce_iq/db/database_helper.dart';
 import '../models/employee.dart'; // adjust path
 
 class EditEmployeeDialog extends StatefulWidget {
@@ -29,6 +30,23 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
   late String selectedOffice;
   late int selectedLeaveWave;
   late DateTime selectedArrivalDate;
+  List<Map<String, dynamic>> brigades = [];
+
+  Future<void> _loadBrigadesForCurrentDepartment() async {
+    final settings = await DatabaseHelper.instance.getSettings();
+    if (settings == null) return;
+
+    final deptId = settings['department_id'] as int;
+    final db = await DatabaseHelper.instance.database;
+
+    brigades = await db.query(
+      'brigades',
+      where: 'department_id = ?',
+      whereArgs: [deptId],
+    );
+
+    setState(() {});
+  }
 
   final List<String> states = [
     'Adrar',
@@ -104,16 +122,7 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
     'CTP',
     'CTGP'
   ];
-  final List<String> offices = [
-    'Chef Service',
-    'Adjoint au Chef de Service',
-    'Secretariat',
-    'Bureau Informatique',
-    'Bureau de video surveillance',
-    'Bureau des télécommunications',
-    'Bureau d\'exploitation',
-    'Bureau des supports techniques'
-  ];
+
   final List<int> leaveWaves = [1, 2, 3, 4, 5, 6, 7];
 
   @override
@@ -129,6 +138,7 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
     selectedOffice = widget.employee.office;
     selectedLeaveWave = widget.employee.leaveWave;
     selectedArrivalDate = widget.employee.arrivalDate;
+    _loadBrigadesForCurrentDepartment();
   }
 
   @override
@@ -202,9 +212,13 @@ class _EditEmployeeDialogState extends State<EditEmployeeDialog> {
                 ),
                 DropdownButtonFormField<String>(
                   value: selectedOffice,
-                  items: offices
-                      .map((o) => DropdownMenuItem(value: o, child: Text(o)))
-                      .toList(),
+                  items: brigades.map((brigade) {
+                    final name = brigade['name'] as String;
+                    return DropdownMenuItem<String>(
+                      value: name,
+                      child: Text(name),
+                    );
+                  }).toList(),
                   onChanged: (val) => setState(() => selectedOffice = val!),
                   decoration: const InputDecoration(labelText: 'Bureau'),
                   validator: (value) =>

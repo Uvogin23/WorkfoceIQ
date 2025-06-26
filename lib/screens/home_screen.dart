@@ -348,7 +348,9 @@ class _PersonnelListState extends State<PersonnelList> {
                       } else {
                         final endDate = DateTime.tryParse(snapshot.data ?? '');
                         if (endDate != null &&
-                            endDate.isBefore(DateTime.now())) {
+                            endDate
+                                .add(Duration(days: 1))
+                                .isBefore(DateTime.now())) {
                           return const Color.fromARGB(255, 240, 110, 110);
                         }
                       }
@@ -376,7 +378,7 @@ class _PersonnelListState extends State<PersonnelList> {
                                       '${p.office} • ${p.status} • Retour: ${formatDate(snapshot.data ?? '')}'),
                       trailing: widget.isAvailable
                           ? Chip(
-                              label: Text('$daysSinceArrival jours'),
+                              label: Text('${daysSinceArrival + 1} jours'),
                               backgroundColor:
                                   const Color.fromARGB(255, 240, 243, 241),
                             )

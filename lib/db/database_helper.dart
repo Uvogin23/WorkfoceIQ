@@ -307,16 +307,18 @@ class DatabaseHelper {
   Future<int> createEvent(Event event) async {
     final db = await database;
 
-    // Step 1: Set all active events for this employee to inactive
+    // Step 1: Update end_date of the currently active event (if any)
+    final previousDay = event.startDate.subtract(const Duration(days: 1));
     await db.update(
       'events',
-      {'is_active': 0},
+      {'end_date': previousDay.toIso8601String(), 'is_active': 0},
       where: 'employee_id = ? AND is_active = 1',
       whereArgs: [event.employeeId],
     );
 
     // Step 2: Insert the new event as active
-    return await db.insert('events', event.toMap());
+    final newEventMap = event.toMap();
+    return await db.insert('events', newEventMap);
   }
 
   Future<List<Event>> getEventsByEmployee(int employeeId) async {
@@ -577,7 +579,7 @@ class DatabaseHelper {
       if (empData.isNotEmpty) {
         final name = empData.first['name'];
         notifications.add(NotificationMessage(
-          '⏰ $name doit reprendre son travail aujourd\'hui.',
+          '⏰ $name doit reprendre son travail demain.',
         ));
       }
     }
